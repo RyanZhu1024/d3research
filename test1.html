@@ -147,7 +147,7 @@
         });
 
       gs
-        .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
+        .attr("transform", function (d) { console.log(d.x, d.y); return "translate(" + d.x + "," + d.y + ")"; });
     }
     function started(d) {
       if (!d3.event.active) {

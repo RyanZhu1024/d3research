@@ -71,7 +71,7 @@
       .attr('fill', (d, i) => colorScale(i));
     gs.append('text').attr('x', -10).attr('y', -20).attr('dy', 10).text(d => d.name);
     function ticked() {
-      gs.attr('transform', (d) => `translate(${d.x},${d.y})`)
+      gs.attr('transform', (d) => { return `translate(${d.x},${d.y})` })
     }
     function dragStart(d) {
       if (!d3.event.active) {
@@ -92,7 +92,7 @@
     }
     function dragEnd(d) {
       if (!d3.event.active) {
-        forceSimulation.alphaTarget(1);
+        forceSimulation.alphaTarget(0);
       }
       nodes.forEach(n => {
         n.fx = null;
