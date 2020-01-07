@@ -50,7 +50,8 @@
     // .force('center', d3.forceCenter());
 
     forceSimulation.nodes(nodes).on('tick', ticked);
-    forceSimulation.force('link').links(edges).distance((d) => 100);
+    forceSimulation.force('link').links(edges).distance((d) => 50);
+    forceSimulation.force('charge').strength(-1000);
     // forceSimulation.force('center').x(width / 2).y(height / 2);
     console.log(nodes);
     console.log(edges);
@@ -74,21 +75,31 @@
     }
     function dragStart(d) {
       if (!d3.event.active) {
-        forceSimulation.alphaTarget(0.5).restart();
+        forceSimulation.alphaTarget(0.8).restart();
       }
       d.fx = d.x;
       d.fy = d.y;
     }
     function dragged(d) {
-      d.fx = d3.event.x;
-      d.fy = d3.event.y;
+      const dfx = d3.event.x - d.fx;
+      const dfy = d3.event.y - d.fy;
+      nodes.forEach(n => {
+        n.fx = n.x + dfx;
+        n.fy = n.y + dfy;
+      })
+      // d.fx = d3.event.x;
+      // d.fy = d3.event.y;
     }
     function dragEnd(d) {
       if (!d3.event.active) {
-        forceSimulation.alphaTarget(0);
+        forceSimulation.alphaTarget(1);
       }
-      d.fx = null;
-      d.fy = null;
+      nodes.forEach(n => {
+        n.fx = null;
+        n.fy = null;
+        n.vx = 0;
+        n.vy = 0;
+      })
     }
   </script>
 
