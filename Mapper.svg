@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="110px" height="64px" viewBox="0 0 110 64" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 61.2 (89653) - https://sketch.com -->
+    <title>Mapper</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Artboard-Copy-3" transform="translate(-353.000000, -426.000000)">
+            <g id="Mapper" transform="translate(346.000000, 426.000000)">
+                <g id="Group-2" transform="translate(74.000000, 22.000000)" stroke="#9B9B9B">
+                    <line x1="-2.84078316e-14" y1="10" x2="23" y2="10" id="Line-3-Copy-10" stroke-width="6" stroke-linecap="square"></line>
+                    <circle id="Oval" stroke-width="2" fill="#CCDCEE" cx="32.5" cy="10" r="9"></circle>
+                </g>
+                <g id="Group" transform="translate(0.000000, 15.000000)" stroke="#9B9B9B">
+                    <line x1="31.5" y1="17.5" x2="55.5" y2="17.5" id="Line-3-Copy-9" stroke-width="6" stroke-linecap="square"></line>
+                    <path d="M17,29 C23.627417,29 29,23.627417 29,17 C29,10.372583 23.627417,5 17,5 C10.372583,5 5,10.372583 5,17" id="Oval" stroke-width="2.5" transform="translate(17.000000, 17.000000) rotate(45.000000) translate(-17.000000, -17.000000) "></path>
+                </g>
+                <g id="Group-3-Copy-80" transform="translate(31.000000, 0.000000)">
+                    <polygon id="Rectangle-2" fill="#79A1E2" points="0.5 0 62.5 1.13686838e-13 62.5 64 0.5 64"></polygon>
+                    <text id="Mapper" font-family="NotoSans-Bold, Noto Sans" font-size="10" font-weight="bold" line-spacing="11" fill="#000000">
+                        <tspan x="12.5" y="36">Mapper</tspan>
+                    </text>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
