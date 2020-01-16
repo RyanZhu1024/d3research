@@ -46,8 +46,6 @@
       { source: 1, target: 6, relation: "籍贯", value: 2 },
       { source: 2, target: 5, relation: "籍贯", value: 0.9 },
       { source: 3, target: 7, relation: "籍贯", value: 1 },
-      { source: 5, target: 6, relation: "同学", value: 1.6 },
-      { source: 6, target: 7, relation: "朋友", value: 0.7 },
       { source: 6, target: 8, relation: "职责", value: 2 }
     ];
     //设置一个color的颜色比例尺，为了让不同的扇形呈现不同的颜色
@@ -58,8 +56,8 @@
     //新建一个力导向图
     var forceSimulation = d3.forceSimulation()
       .force("link", d3.forceLink())
-      .force("charge", d3.forceManyBody())
-      .force("center", d3.forceCenter());;
+      .force("charge", d3.forceManyBody().strength(-100))
+      .force("center", d3.forceCenter());
 
     //初始化力导向图，也就是传入数据
     //生成节点数据
@@ -76,8 +74,6 @@
       .x(width / 2)
       .y(height / 2);
     //在浏览器的控制台输出
-    console.log(nodes);
-    console.log(edges);
 
     //有了节点和边的数据后，我们开始绘制
     //绘制边
@@ -147,7 +143,7 @@
         });
 
       gs
-        .attr("transform", function (d) { console.log(d.x, d.y); return "translate(" + d.x + "," + d.y + ")"; });
+        .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
     }
     function started(d) {
       if (!d3.event.active) {
