@@ -17,7 +17,12 @@
 
     const width = window.innerWidth,
       height = window.innerHeight;
-    const mappers = [{ x: 66, y: 10 }, { x: 150, y: 50 }, { x: 250, y: 80 }]
+    const mappers = [{ x: 66, y: 10 }, { x: 150, y: 50 }, { x: 250, y: 80 }];
+    const links = [{ source: 0, target: 1 }, { source: 1, target: 2 }];
+    links.forEach(d => {
+      d.source = mappers[d.source];
+      d.target = mappers[d.target];
+    })
     const svg = d3.select("body").append("svg")
       .attr("width", width)
       .attr("height", height);
