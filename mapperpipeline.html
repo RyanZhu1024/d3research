@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+  .node {
+    stroke: #fff;
+    stroke-width: 1.5px;
+  }
+
+  .link {
+    stroke: #999;
+  }
+</style>
+
+<body>
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script>
+
+    const width = window.innerWidth,
+      height = window.innerHeight;
+    const mappers = [{ x: 66, y: 10 }, { x: 150, y: 50 }, { x: 250, y: 80 }]
+    const svg = d3.select("body").append("svg")
+      .attr("width", width)
+      .attr("height", height);
+    const root = svg.append('g').attr("cursor", "grab");
+    // const snapContainer = svg.append('g').attr('transform', 'translate(66, 10)');
+    const snapContainer = root.selectAll('g').data(mappers).enter().append('g').attr('transform', (d) => `translate(${d.x}, ${d.y})`);
+    const head = snapContainer.append('g').attr('stroke', '#9B9B9B').attr('transform', 'translate(45, 22)');
+    head.append('line')
+      .attr('stroke-width', 6)
+      .attr('stroke-linecap', 'square')
+      .attr('x1', -2.84078316e-14)
+      .attr('y1', 10)
+      .attr('x2', 23)
+      .attr('y2', 10)
+    head.append('circle')
+      .attr('stroke-width', 2)
+      .attr('fill', '#CCDCEE')
+      .attr('cx', 32.5)
+      .attr('cy', 10)
+      .attr('r', 9)
+    const tail = snapContainer.append('g').attr('stroke', '#9B9B9B').attr('transform', 'translate(0, 15)');
+    tail.append('line').attr('stroke-width', 6)
+      .attr('stroke-linecap', 'square')
+      .attr('x1', -2)
+      .attr('y1', 17.5)
+      .attr('x2', 55.5)
+      .attr('y2', 17.5);
+    tail.append('path').attr('d', 'M17,29 C23.627417,29 29,23.627417 29,17 C29,10.372583 23.627417,5 17,5 C10.372583,5 5,10.372583 5,17')
+      .attr('stroke-width', 2.5)
+      .attr('transform', 'translate(-17, 17) rotate(45) translate(-17, -17) ')
+      .attr('fill', 'none');
+    const body = snapContainer.append('polygon')
+      .attr('x', 10)
+      .attr('y', 10)
+      .attr('points', '0.5 0 62.5 1.13686838e-13 62.5 64 0.5 64')
+      .attr('fill', '#79A1E2');
+    snapContainer.append('text').attr('font-size', 10)
+      .attr('font-weight', 'bold')
+      .attr('line-spacing', 11)
+      .attr('fill', '#000000')
+      .attr('x', 14.5)
+      .attr('y', 35)
+      .text(() => 'Mapper')
+    function dragStart(d) {
+      d3.select(this).raise().attr('stroke', 'black')
+    }
+    function dragging(d) {
+      d.x = d3.event.x;
+      d.y = d3.event.y;
+      d3.select(this).attr('transform', `translate(${d3.event.x} ,${d3.event.y})`);
+    }
+    function dragEnd() {
+      d3.select(this).attr('stroke', null);
+    }
+    snapContainer.call(d3.drag().on('start', dragStart).on('drag', dragging).on('end', dragEnd));
+    function zoomed() {
+      root.attr("transform", d3.event.transform);
+    }
+    svg.call(d3.zoom()
+      .extent([[0, 0], [width, height]])
+      .scaleExtent([-8, 8])
+      .on("zoom", zoomed));
+
+  </script>
