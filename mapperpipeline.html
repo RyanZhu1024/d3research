@@ -1,5 +1,9 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
+
+<head>
+  <title>mapper Pipeline</title>
+</head>
 <style>
   .node {
     stroke: #fff;
@@ -17,67 +21,21 @@
 
     const width = window.innerWidth,
       height = window.innerHeight;
-    const mappers = [{ x: 66, y: 10 }, { x: 150, y: 50 }, { x: 250, y: 80 }];
+    const nodes = [{ x: 66, y: 10, label: 'mapper' }, { x: 150, y: 50, label: 'join' }, { x: 250, y: 80, label: 'rest get' }];
     const links = [{ source: 0, target: 1 }, { source: 1, target: 2 }];
+    let hoveredNode = null;
+    let shouPullLine = false;
+    let selectedHeadCircle = null;
+    let selectedHeadLine = null;
+    const rectSize = 62;
     links.forEach(d => {
-      d.source = mappers[d.source];
-      d.target = mappers[d.target];
+      d.source = nodes[d.source];
+      d.target = nodes[d.target];
     })
     const svg = d3.select("body").append("svg")
       .attr("width", width)
       .attr("height", height);
-    const root = svg.append('g').attr("cursor", "grab");
-    // const snapContainer = svg.append('g').attr('transform', 'translate(66, 10)');
-    const snapContainer = root.selectAll('g').data(mappers).enter().append('g').attr('transform', (d) => `translate(${d.x}, ${d.y})`);
-    const head = snapContainer.append('g').attr('stroke', '#9B9B9B').attr('transform', 'translate(45, 22)');
-    head.append('line')
-      .attr('stroke-width', 6)
-      .attr('stroke-linecap', 'square')
-      .attr('x1', -2.84078316e-14)
-      .attr('y1', 10)
-      .attr('x2', 23)
-      .attr('y2', 10)
-    head.append('circle')
-      .attr('stroke-width', 2)
-      .attr('fill', '#CCDCEE')
-      .attr('cx', 32.5)
-      .attr('cy', 10)
-      .attr('r', 9)
-    const tail = snapContainer.append('g').attr('stroke', '#9B9B9B').attr('transform', 'translate(0, 15)');
-    tail.append('line').attr('stroke-width', 6)
-      .attr('stroke-linecap', 'square')
-      .attr('x1', -2)
-      .attr('y1', 17.5)
-      .attr('x2', 55.5)
-      .attr('y2', 17.5);
-    tail.append('path').attr('d', 'M17,29 C23.627417,29 29,23.627417 29,17 C29,10.372583 23.627417,5 17,5 C10.372583,5 5,10.372583 5,17')
-      .attr('stroke-width', 2.5)
-      .attr('transform', 'translate(-17, 17) rotate(45) translate(-17, -17) ')
-      .attr('fill', 'none');
-    const body = snapContainer.append('polygon')
-      .attr('x', 10)
-      .attr('y', 10)
-      .attr('points', '0.5 0 62.5 1.13686838e-13 62.5 64 0.5 64')
-      .attr('fill', '#79A1E2');
-    snapContainer.append('text').attr('font-size', 10)
-      .attr('font-weight', 'bold')
-      .attr('line-spacing', 11)
-      .attr('fill', '#000000')
-      .attr('x', 14.5)
-      .attr('y', 35)
-      .text(() => 'Mapper')
-    function dragStart(d) {
-      d3.select(this).raise().attr('stroke', 'black')
-    }
-    function dragging(d) {
-      d.x = d3.event.x;
-      d.y = d3.event.y;
-      d3.select(this).attr('transform', `translate(${d3.event.x} ,${d3.event.y})`);
-    }
-    function dragEnd() {
-      d3.select(this).attr('stroke', null);
-    }
-    snapContainer.call(d3.drag().on('start', dragStart).on('drag', dragging).on('end', dragEnd));
+    const root = svg.append('g');
     function zoomed() {
       root.attr("transform", d3.event.transform);
     }
@@ -85,5 +43,197 @@
       .extent([[0, 0], [width, height]])
       .scaleExtent([-8, 8])
       .on("zoom", zoomed));
+    const nodeGroup = root.append('g')
+      .selectAll('rect')
+      .data(nodes)
+      .enter()
+      .append('rect')
+      .attr('height', rectSize)
+      .attr('width', rectSize)
+      .attr('x', d => d.x)
+      .attr('y', d => d.y)
+      .attr('fill', '#79A1E2');
+    const labelsGroup = root.append('g')
+      .selectAll('text')
+      .data(nodes)
+      .enter()
+      .append('text')
+      .attr('x', d => d.x + rectSize / 2)
+      .attr('y', d => d.y + rectSize / 2)
+      .attr('font-size', 12)
+      .attr("text-anchor", "middle")
+      .attr('font-weight', 'bold')
+      .attr('line-spacing', 11)
+      .attr('fill', '#000000')
+      .text(d => d.label);
+    const tailLineGroup = root.append('g')
+      .selectAll('line')
+      .data(nodes)
+      .enter()
+      .append('line')
+      .attr('stroke', '#9B9B9B')
+      .attr('stroke-width', 6)
+      .attr('stroke-linecap', 'square')
+      .attr('x1', d => d.x - 5)
+      .attr('y1', d => d.y + rectSize / 2)
+      .attr('x2', d => d.x - 3)
+      .attr('y2', d => d.y + rectSize / 2)
+    const tailRingGroup = root.append('g')
+      .selectAll('path')
+      .data(nodes)
+      .enter()
+      .append('path')
+      .attr('d', 'M17,29 C23.627417,29 29,23.627417 29,17 C29,10.372583 23.627417,5 17,5 C10.372583,5 5,10.372583 5,17')
+      .attr('stroke-width', 2.5)
+      .attr('transform', d => `translate(${d.x - 20}, ${d.y + rectSize / 2}) rotate(45) translate(-17, -17)`)
+      .attr('stroke', '#9B9B9B')
+      .attr('fill', 'none');
+    const headLineGroup = root.append('g')
+      .selectAll('line')
+      .data(nodes)
+      .enter()
+      .append('line')
+      .attr('stroke', '#9B9B9B')
+      .attr('stroke-width', 6)
+      .attr('stroke-linecap', 'square')
+      .attr('x1', d => d.x + rectSize + 3)
+      .attr('y1', d => d.y + rectSize / 2)
+      .attr('x2', d => d.x + rectSize + 5)
+      .attr('y2', d => d.y + rectSize / 2);
+    const headRingGroup = root.append('g')
+      .selectAll('circle')
+      .data(nodes)
+      .enter()
+      .append('circle')
+      .attr('stroke', '#9B9B9B')
+      .attr('stroke-width', 2)
+      .attr('fill', '#CCDCEE')
+      .attr('cx', d => d.x + rectSize + 5 + 9)
+      .attr('cy', d => d.y + rectSize / 2)
+      .attr('r', 9)
+      .attr('cursor', 'pointer');
+    function updateNode(node) {
+      node.attr('x', d => d.x)
+        .attr('y', d => d.y);
+    }
+    function updateLabel(label) {
+      label.attr('x', d => d.x + rectSize / 2)
+        .attr('y', d => d.y + rectSize / 2)
+    }
+    function updateTailLine(tailLine) {
+      tailLine.attr('x1', d => d.x - 5)
+        .attr('y1', d => d.y + rectSize / 2)
+        .attr('x2', d => d.x - 3)
+        .attr('y2', d => d.y + rectSize / 2)
+    }
+    function updateTailRing(tailRing) {
+      tailRing.attr('transform', d => `translate(${d.x - 20}, ${d.y + rectSize / 2}) rotate(45) translate(-17, -17)`)
+    }
+    function updateHeadLine(headLine) {
+      headLine.attr('x1', d => d.x + rectSize + 3)
+        .attr('y1', d => d.y + rectSize / 2)
+        .attr('x2', d => d.x + rectSize + 5)
+        .attr('y2', d => d.y + rectSize / 2);
+    }
+    function updateHeadRing(headRing) {
+      headRing.attr('cx', d => d.x + rectSize + 5 + 9)
+        .attr('cy', d => d.y + rectSize / 2)
+    }
+    function update() {
+      nodeGroup.call(updateNode);
+      labelsGroup.call(updateLabel);
+      tailLineGroup.call(updateTailLine);
+      tailRingGroup.call(updateTailRing);
+      headLineGroup.call(updateHeadLine);
+      headRingGroup.call(updateHeadRing);
+    }
+    function dragStart(d) {
+      d3.select(this).raise().attr('stroke', 'black').attr('cursor', 'grab');
+    }
+    function dragging(d) {
+      d.x = d3.event.x;
+      d.y = d3.event.y;
+      update();
+    }
+    function dragEnd() {
+      d3.select(this).attr('stroke', null).attr('cursor', null);
+    }
+    nodeGroup.call(d3.drag().on('start', dragStart).on('drag', dragging).on('end', dragEnd));
+    // const snapContainer = svg.append('g').attr('transform', 'translate(66, 10)');
+    // const snapContainer = root.selectAll('g')
+    //   .data(nodes)
+    //   .enter()
+    //   .append('g')
+    //   .attr('transform', (d) => `translate(${d.x}, ${d.y})`)
+    //   .on('click', function (d) {
+    //     console.log('click from container')
+    //   });
+    // const head = snapContainer.append('g').attr('stroke', '#9B9B9B').attr('transform', 'translate(45, 22)');
+    // head.append('line')
+    //   .attr('stroke-width', 6)
+    //   .attr('stroke-linecap', 'square')
+    //   .attr('x1', -2.84078316e-14)
+    //   .attr('y1', 10)
+    //   .attr('x2', 23)
+    //   .attr('y2', 10)
+    // head.append('circle')
+    //   .attr('stroke-width', 2)
+    //   .attr('fill', '#CCDCEE')
+    //   .attr('cx', 32.5)
+    //   .attr('cy', 10)
+    //   .attr('r', 9)
+    //   .attr('cursor', 'pointer')
+    //   .on('mousedown', function (d) {
+    //     d3.event.stopPropagation();
+    //     console.log('mousedown from head');
+    //     shouPullLine = true;
+    //     selectedHeadCircle = d3.select(this);
+    //     selectedHeadLine = d3.select(this.parentNode).select('line');
+    //     console.log('circle', selectedHeadCircle);
+    //     console.log('line', selectedHeadLine);
+    //   })
+    //   .on('mouseup', function () {
+    //     selectedHeadCircle = null;
+    //     selectedHeadLine = null;
+    //   })
+    //   .on('click', function (d) {
+    //     d3.event.stopPropagation();
+    //   })
+    // const tail = snapContainer.append('g').attr('stroke', '#9B9B9B').attr('transform', 'translate(0, 15)');
+    // tail.append('line').attr('stroke-width', 6)
+    //   .attr('stroke-linecap', 'square')
+    //   .attr('x1', -2)
+    //   .attr('y1', 17.5)
+    //   .attr('x2', 55.5)
+    //   .attr('y2', 17.5);
+    // tail.append('path').attr('d', 'M17,29 C23.627417,29 29,23.627417 29,17 C29,10.372583 23.627417,5 17,5 C10.372583,5 5,10.372583 5,17')
+    //   .attr('stroke-width', 2.5)
+    //   .attr('transform', 'translate(-17, 17) rotate(45) translate(-17, -17) ')
+    //   .attr('fill', 'none');
 
+    // const body = snapContainer.append('polygon')
+    //   .attr('x', 10)
+    //   .attr('y', 10)
+    //   .attr('points', '0.5 0 62.5 1.13686838e-13 62.5 64 0.5 64')
+    //   .attr('fill', '#79A1E2');
+    // snapContainer.append('text').attr('font-size', 10)
+    //   .attr('font-weight', 'bold')
+    //   .attr('line-spacing', 11)
+    //   .attr('fill', '#000000')
+    //   .attr('x', 14.5)
+    //   .attr('y', 35)
+    //   .attr('pointer-events', 'none')
+    // .text(() => 'Mapper')
+
+    // snapContainer.call(d3.drag().on('start', dragStart).on('drag', dragging).on('end', dragEnd));
+
+    // d3.select(window).on('mousemove', function () {
+    //   if (selectedHeadCircle) {
+    //     const preX = selectedHeadCircle.cx, preY = selectedHeadCircle.cy;
+    //     console.log(preX, preY);
+    //     console.log(d3.event.x, d3.event.y);
+    //     console.log(d3.mouse(svg.node()))
+    //     // selectedHeadCircle.attr('cx', preX + d3.event.dx).attr('cy', preY + d3.event.dy)
+    //   }
+    // })
   </script>
