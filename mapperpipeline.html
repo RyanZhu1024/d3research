@@ -22,9 +22,9 @@
     const width = window.innerWidth,
       height = window.innerHeight;
     let data = [
-      { nodex: 66, nodey: 10, label: 'mapper', cx: null, cy: null },
-      { nodex: 150, nodey: 50, label: 'join', cx: null, cy: null },
-      { nodex: 250, nodey: 80, label: 'rest get', cx: null, cy: null }
+      { id: 1, nodex: 66, nodey: 10, label: 'mapper', cx: null, cy: null },
+      { id: 2, nodex: 150, nodey: 50, label: 'join', cx: null, cy: null },
+      { id: 3, nodex: 250, nodey: 80, label: 'rest get', cx: null, cy: null }
     ];
     let links = [];
     const rectSize = 62;
@@ -65,37 +65,37 @@
       labelGroup = root.append('g').attr('id', 'labelGroup');
     let nodes, tailLines, tailRings, headLines, headRings, labels;
     function drawSnap() {
-      const newTailLines = tailLineGroup.selectAll('line').data(data);
-      newTailLines.exit().remove();
-      tailLines = newTailLines.enter()
+      tailLines = tailLineGroup.selectAll('line').data(data);
+      tailLines.exit().remove();
+      tailLines = tailLines.enter()
         .append('line')
         .attr('stroke', '#9B9B9B')
         .attr('stroke-width', 6)
         .attr('stroke-linecap', 'square')
-        .on('click', () => d3.event.stopPropagation()).merge(newTailLines);
+        .on('click', () => d3.event.stopPropagation()).merge(tailLines);
 
-      const newTailRings = tailRingGroup.selectAll('path').data(data);
-      newTailRings.exit().remove();
-      tailRings = newTailRings.enter()
+      tailRings = tailRingGroup.selectAll('path').data(data);
+      tailRings.exit().remove();
+      tailRings = tailRings.enter()
         .append('path')
         .attr('d', 'M17,29 C23.627417,29 29,23.627417 29,17 C29,10.372583 23.627417,5 17,5 C10.372583,5 5,10.372583 5,17')
         .attr('stroke-width', 2.5)
         .attr('stroke', '#9B9B9B')
         .attr('fill', 'none')
-        .on('click', () => d3.event.stopPropagation()).merge(newTailRings);
+        .on('click', () => d3.event.stopPropagation()).merge(tailRings);
 
-      const newHeadLines = headLineGroup.selectAll('line').data(data);
-      newHeadLines.exit().remove();
-      headLines = newHeadLines.enter()
+      headLines = headLineGroup.selectAll('line').data(data);
+      headLines.exit().remove();
+      headLines = headLines.enter()
         .append('line')
         .attr('stroke', '#9B9B9B')
         .attr('stroke-width', 6)
         .attr('stroke-linecap', 'square')
-        .on('click', () => d3.event.stopPropagation()).merge(newHeadLines);
+        .on('click', () => d3.event.stopPropagation()).merge(headLines);
 
-      const newHeadRings = headRingGroup.selectAll('circle').data(data);
-      newHeadRings.exit().remove();
-      headRings = newHeadRings.enter()
+      headRings = headRingGroup.selectAll('circle').data(data);
+      headRings.exit().remove();
+      headRings = headRings.enter()
         .append('circle')
         .attr('stroke', '#9B9B9B')
         .attr('stroke-width', 2)
@@ -103,21 +103,23 @@
         .attr('r', R)
         .attr('cursor', 'pointer')
         .call(d3.drag().subject(d => ({ x: d.cx || getHeadRingCX(d), y: d.cy || getHeadRingCY(d) })).on('start', dragHeadRingStart).on('drag', draggingHeadRing).on('end', dragHeadRingEnd))
-        .on('click', () => d3.event.stopPropagation()).merge(newHeadRings);
+        .on('click', () => d3.event.stopPropagation()).merge(headRings);
 
-      const newNodes = nodeGroup.selectAll('rect').data(data);
-      newNodes.exit().remove();
-      nodes = newNodes.enter()
+      nodes = nodeGroup.selectAll('rect').data(data, d => d.id);
+      nodes.exit().remove();
+      nodes = nodes.enter()
         .append('rect')
+        .attr('id', d => d.id)
         .attr('height', rectSize)
         .attr('width', rectSize)
         .attr('fill', '#79A1E2')
         .call(d3.drag().subject(d => ({ x: d.nodex, y: d.nodey })).on('start', dragNodeStart).on('drag', draggingNode).on('end', dragNodeEnd))
-        .on('click', onClickNode).merge(newNodes);
+        .on('contextmenu', onMouseDownNode)
+        .on('click', () => d3.event.stopPropagation()).merge(nodes);
 
-      const newLabels = labelGroup.selectAll('text').data(data);
-      newLabels.exit().remove();
-      labels = newLabels.enter()
+      labels = labelGroup.selectAll('text').data(data, d => d.id);
+      labels.exit().remove();
+      labels = labels.enter()
         .append('text')
         .attr('font-size', 12)
         .attr("text-anchor", "middle")
@@ -127,11 +129,12 @@
         .attr('cursor', 'default')
         .text(d => d.label)
         .call(d3.drag().subject(d => ({ x: d.nodex, y: d.nodey })).on('start', dragLabelStart).on('drag', draggingLabel).on('end', dragLabelEnd))
-        .on('click', onClickLabel).merge(newLabels);
+        .on('contextmenu', onMouseDownLabel)
+        .on('click', () => d3.event.stopPropagation()).merge(labels);
     }
 
-    function onClickNode(d) {
-      d3.event.stopPropagation()
+    function onMouseDownNode(d) {
+      d3.event.preventDefault();
       if (d3.event.shiftKey) {
         data = data.filter(temp => temp !== d);
         links = links.filter(link => link.source !== d);
@@ -144,11 +147,11 @@
         drawSnap();
         update();
       } else {
-        console.log('clicked');
+        console.log('mouse down on node');
       }
     }
-    function onClickLabel(d) {
-      onClickNode(d);
+    function onMouseDownLabel(d) {
+      onMouseDownNode(d);
     }
     function updateNode(node) {
       node.attr('x', d => d.nodex)
@@ -265,9 +268,12 @@
         }
       })
     }
-    svg.on('click', () => {
-      console.log('add a new snap');
-      const newNode = { nodex: d3.event.x, nodey: d3.event.y, label: 'new snap', cx: null, cy: null };
+    let count = 100;
+    svg.on('click', function () {
+      let coordinates = d3.mouse(this);
+      const transform = d3.zoomTransform(svg.node());
+      coordinates = transform.invert(coordinates);
+      const newNode = { id: count++, nodex: coordinates[0], nodey: coordinates[1], label: 'new snap', cx: null, cy: null };
       data.push(newNode);
       drawSnap();
       update();
