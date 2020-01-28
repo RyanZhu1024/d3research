@@ -43,32 +43,8 @@
       .extent([[0, 0], [width, height]])
       .scaleExtent([-8, 8])
       .on("zoom", zoomed));
-    const nodeGroup = root.append('g')
-      .selectAll('rect')
-      .data(nodes)
-      .enter()
-      .append('rect')
-      .attr('height', rectSize)
-      .attr('width', rectSize)
-      .attr('x', d => d.nodex)
-      .attr('y', d => d.nodey)
-      .attr('fill', '#79A1E2');
     const getLabelX = d => d.nodex + rectSize / 2;
     const getLabelY = d => d.nodey + rectSize / 2;
-    const labelsGroup = root.append('g')
-      .selectAll('text')
-      .data(nodes)
-      .enter()
-      .append('text')
-      .attr('x', getLabelX)
-      .attr('y', getLabelY)
-      .attr('font-size', 12)
-      .attr("text-anchor", "middle")
-      .attr('font-weight', 'bold')
-      .attr('line-spacing', 11)
-      .attr('fill', '#000000')
-      .attr('cursor', 'default')
-      .text(d => d.label);
     const getTailLineX1 = d => d.nodex - 5;
     const getTailLineY1 = d => d.nodey + rectSize / 2;
     const getTailLineX2 = d => d.nodex - 3;
@@ -98,7 +74,7 @@
       .attr('transform', getTailRingPosition)
       .attr('stroke', '#9B9B9B')
       .attr('fill', 'none');
-    const getHeadLineX1 = d => d.nodex + rectSize + 3;
+    const getHeadLineX1 = d => d.nodex + rectSize / 2;
     const getHeadLineY1 = d => d.nodey + rectSize / 2;
     const getHeadLineX2 = d => d.cx || d.nodex + rectSize + 5;
     const getHeadLineY2 = d => d.cy || d.nodey + rectSize / 2;
@@ -131,6 +107,30 @@
       .attr('cy', getHeadRingCY)
       .attr('r', R)
       .attr('cursor', 'pointer');
+    const nodeGroup = root.append('g')
+      .selectAll('rect')
+      .data(nodes)
+      .enter()
+      .append('rect')
+      .attr('height', rectSize)
+      .attr('width', rectSize)
+      .attr('x', d => d.nodex)
+      .attr('y', d => d.nodey)
+      .attr('fill', '#79A1E2');
+    const labelsGroup = root.append('g')
+      .selectAll('text')
+      .data(nodes)
+      .enter()
+      .append('text')
+      .attr('x', getLabelX)
+      .attr('y', getLabelY)
+      .attr('font-size', 12)
+      .attr("text-anchor", "middle")
+      .attr('font-weight', 'bold')
+      .attr('line-spacing', 11)
+      .attr('fill', '#000000')
+      .attr('cursor', 'default')
+      .text(d => d.label);
     function updateNode(node) {
       node.attr('x', d => d.nodex)
         .attr('y', d => d.nodey);
