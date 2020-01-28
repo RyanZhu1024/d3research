@@ -106,7 +106,7 @@
       .attr('cx', getHeadRingCX)
       .attr('cy', getHeadRingCY)
       .attr('r', R)
-      .attr('cursor', 'pointer');
+      .attr('cursor', 'pointer').call(d3.drag().subject(d => ({ x: d.cx || getHeadRingCX(d), y: d.cy || getHeadRingCY(d) })).on('start', dragHeadRingStart).on('drag', draggingHeadRing).on('end', dragHeadRingEnd));
     const nodeGroup = root.append('g')
       .selectAll('rect')
       .data(nodes)
@@ -116,7 +116,7 @@
       .attr('width', rectSize)
       .attr('x', d => d.nodex)
       .attr('y', d => d.nodey)
-      .attr('fill', '#79A1E2');
+      .attr('fill', '#79A1E2').call(d3.drag().subject(d => ({ x: d.nodex, y: d.nodey })).on('start', dragNodeStart).on('drag', draggingNode).on('end', dragNodeEnd));
     const labelsGroup = root.append('g')
       .selectAll('text')
       .data(nodes)
@@ -130,7 +130,7 @@
       .attr('line-spacing', 11)
       .attr('fill', '#000000')
       .attr('cursor', 'default')
-      .text(d => d.label);
+      .text(d => d.label).call(d3.drag().subject(d => ({ x: d.nodex, y: d.nodey })).on('start', dragLabelStart).on('drag', draggingLabel).on('end', dragLabelEnd));
     function updateNode(node) {
       node.attr('x', d => d.nodex)
         .attr('y', d => d.nodey);
@@ -165,8 +165,6 @@
       tailRingGroup.call(updateTailRing);
       headLineGroup.call(updateHeadLine);
       headRingGroup.call(updateHeadRing);
-      console.log(nodes);
-      console.log(links);
     }
     function dragNodeStart(d) {
       d3.event.sourceEvent.stopPropagation();
@@ -248,7 +246,7 @@
         }
       })
     }
-    nodeGroup.call(d3.drag().subject(d => ({ x: d.nodex, y: d.nodey })).on('start', dragNodeStart).on('drag', draggingNode).on('end', dragNodeEnd));
-    labelsGroup.call(d3.drag().subject(d => ({ x: d.nodex, y: d.nodey })).on('start', dragLabelStart).on('drag', draggingLabel).on('end', dragLabelEnd));
-    headRingGroup.call(d3.drag().subject(d => ({ x: d.cx || getHeadRingCX(d), y: d.cy || getHeadRingCY(d) })).on('start', dragHeadRingStart).on('drag', draggingHeadRing).on('end', dragHeadRingEnd));
+    // nodeGroup
+    // labelsGroup
+    // headRingGroup;
   </script>
