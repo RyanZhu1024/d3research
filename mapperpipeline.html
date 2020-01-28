@@ -165,6 +165,8 @@
       tailRingGroup.call(updateTailRing);
       headLineGroup.call(updateHeadLine);
       headRingGroup.call(updateHeadRing);
+      console.log(nodes);
+      console.log(links);
     }
     function dragNodeStart(d) {
       d3.event.sourceEvent.stopPropagation();
@@ -236,10 +238,12 @@
             d.cy = null;
             links = links.filter(link => link.source !== d || link.target !== tail);
           } else {
-            d.cx = tailRingX;
-            d.cy = tailRingY;
             links.push({ source: d, target: tail })
           }
+          links.forEach(link => {
+            link.source.cx = getTailRingX(link.target);
+            link.source.cy = getTailRingY(link.target);
+          })
           update();
         }
       })
