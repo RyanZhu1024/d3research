@@ -28,10 +28,6 @@
     ];
     let links = [];
     const rectSize = 62;
-    // links.forEach(d => {
-    //   d.source = nodes[d.source];
-    //   d.target = nodes[d.target];
-    // })
     const svg = d3.select("body").append("svg")
       .attr("width", width)
       .attr("height", height);
@@ -51,6 +47,12 @@
     const getTailLineY2 = d => d.nodey + rectSize / 2;
     const getTailRingX = d => d.nodex - 20;
     const getTailRingY = d => d.nodey + rectSize / 2;
+    const getTailRingPosition = d => `translate(${getTailRingX(d)}, ${getTailRingY(d)}) rotate(45) translate(-17, -17)`
+    const R = 9;
+    const getHeadRingCX = d => {
+      return d.cx || d.nodex + rectSize + 5 + R
+    };
+    const getHeadRingCY = d => d.cy || d.nodey + rectSize / 2;
     const tailLineGroup = root.append('g')
       .selectAll('line')
       .data(nodes)
@@ -63,7 +65,6 @@
       .attr('y1', getTailLineY1)
       .attr('x2', getTailLineX2)
       .attr('y2', getTailLineY2)
-    const getTailRingPosition = d => `translate(${getTailRingX(d)}, ${getTailRingY(d)}) rotate(45) translate(-17, -17)`
     const tailRingGroup = root.append('g').attr('id', 'tailRingGroup')
       .selectAll('path')
       .data(nodes)
@@ -90,11 +91,6 @@
       .attr('y1', getHeadLineY1)
       .attr('x2', getHeadLineX2)
       .attr('y2', getHeadLineY2);
-    const R = 9;
-    const getHeadRingCX = d => {
-      return d.cx || d.nodex + rectSize + 5 + R
-    };
-    const getHeadRingCY = d => d.cy || d.nodey + rectSize / 2;
     const headRingGroup = root.append('g')
       .selectAll('circle')
       .data(nodes)
@@ -130,7 +126,7 @@
       .attr('line-spacing', 11)
       .attr('fill', '#000000')
       .attr('cursor', 'default')
-      .text(d => d.label).call(d3.drag().subject(d => ({ x: d.nodex, y: d.nodey })).on('start', dragLabelStart).on('drag', draggingLabel).on('end', dragLabelEnd));
+      .text(d => d.label).call(d3.drag().subject(d => ({ x: d.nodex, y: d.nodey })).on('start', dragLabelStart).on('drag', draggingLabel).on('end', dragLabelEnd));  
     function updateNode(node) {
       node.attr('x', d => d.nodex)
         .attr('y', d => d.nodey);
