@@ -26,7 +26,7 @@
       { nodex: 150, nodey: 50, label: 'join', cx: null, cy: null },
       { nodex: 250, nodey: 80, label: 'rest get', cx: null, cy: null }
     ];
-    // const links = [{ source: 0, target: 1 }, { source: 1, target: 2 }];
+    let links = [];
     const rectSize = 62;
     // links.forEach(d => {
     //   d.source = nodes[d.source];
@@ -173,6 +173,15 @@
     function draggingNode(d) {
       d.nodex = d3.event.x;
       d.nodey = d3.event.y;
+      links.forEach(link => {
+        if (link.source === d) {
+          // pass
+        }
+        if (link.target === d) {
+          link.source.cx = getTailRingX(d);
+          link.source.cy = getTailRingY(d);
+        }
+      })
       update();
     }
     function dragNodeEnd() {
@@ -189,6 +198,15 @@
     function draggingLabel(d) {
       d.nodex = d3.event.x;
       d.nodey = d3.event.y;
+      links.forEach(link => {
+        if (link.source === d) {
+          // pass
+        }
+        if (link.target === d) {
+          link.source.cx = getTailRingX(d);
+          link.source.cy = getTailRingY(d);
+        }
+      })
       update();
     }
     function dragLabelEnd(d) {
@@ -213,13 +231,14 @@
           const tailRingX = getTailRingX(tail);
           const tailRingY = getTailRingY(tail);
           const distance = Math.sqrt(Math.pow((tailRingX - d3.event.x), 2) + Math.pow((tailRingY - d3.event.y), 2));
-          console.log(tail.label, distance);
           if (distance > 10) {
             d.cx = null;
             d.cy = null;
+            links = links.filter(link => link.source !== d || link.target !== tail);
           } else {
             d.cx = tailRingX;
             d.cy = tailRingY;
+            links.push({ source: d, target: tail })
           }
           update();
         }
