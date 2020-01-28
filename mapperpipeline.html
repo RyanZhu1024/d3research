@@ -21,7 +21,7 @@
 
     const width = window.innerWidth,
       height = window.innerHeight;
-    const nodes = [
+    let data = [
       { nodex: 66, nodey: 10, label: 'mapper', cx: null, cy: null },
       { nodex: 150, nodey: 50, label: 'join', cx: null, cy: null },
       { nodex: 250, nodey: 80, label: 'rest get', cx: null, cy: null }
@@ -53,80 +53,103 @@
       return d.cx || d.nodex + rectSize + 5 + R
     };
     const getHeadRingCY = d => d.cy || d.nodey + rectSize / 2;
-    const tailLineGroup = root.append('g')
-      .selectAll('line')
-      .data(nodes)
-      .enter()
-      .append('line')
-      .attr('stroke', '#9B9B9B')
-      .attr('stroke-width', 6)
-      .attr('stroke-linecap', 'square')
-      .attr('x1', getTailLineX1)
-      .attr('y1', getTailLineY1)
-      .attr('x2', getTailLineX2)
-      .attr('y2', getTailLineY2)
-    const tailRingGroup = root.append('g').attr('id', 'tailRingGroup')
-      .selectAll('path')
-      .data(nodes)
-      .enter()
-      .append('path')
-      .attr('d', 'M17,29 C23.627417,29 29,23.627417 29,17 C29,10.372583 23.627417,5 17,5 C10.372583,5 5,10.372583 5,17')
-      .attr('stroke-width', 2.5)
-      .attr('transform', getTailRingPosition)
-      .attr('stroke', '#9B9B9B')
-      .attr('fill', 'none');
     const getHeadLineX1 = d => d.nodex + rectSize / 2;
     const getHeadLineY1 = d => d.nodey + rectSize / 2;
     const getHeadLineX2 = d => d.cx || d.nodex + rectSize + 5;
     const getHeadLineY2 = d => d.cy || d.nodey + rectSize / 2;
-    const headLineGroup = root.append('g').attr('id', 'headLineGroup')
-      .selectAll('line')
-      .data(nodes)
-      .enter()
-      .append('line')
-      .attr('stroke', '#9B9B9B')
-      .attr('stroke-width', 6)
-      .attr('stroke-linecap', 'square')
-      .attr('x1', getHeadLineX1)
-      .attr('y1', getHeadLineY1)
-      .attr('x2', getHeadLineX2)
-      .attr('y2', getHeadLineY2);
-    const headRingGroup = root.append('g')
-      .selectAll('circle')
-      .data(nodes)
-      .enter()
-      .append('circle')
-      .attr('stroke', '#9B9B9B')
-      .attr('stroke-width', 2)
-      .attr('fill', '#CCDCEE')
-      .attr('cx', getHeadRingCX)
-      .attr('cy', getHeadRingCY)
-      .attr('r', R)
-      .attr('cursor', 'pointer').call(d3.drag().subject(d => ({ x: d.cx || getHeadRingCX(d), y: d.cy || getHeadRingCY(d) })).on('start', dragHeadRingStart).on('drag', draggingHeadRing).on('end', dragHeadRingEnd));
-    const nodeGroup = root.append('g')
-      .selectAll('rect')
-      .data(nodes)
-      .enter()
-      .append('rect')
-      .attr('height', rectSize)
-      .attr('width', rectSize)
-      .attr('x', d => d.nodex)
-      .attr('y', d => d.nodey)
-      .attr('fill', '#79A1E2').call(d3.drag().subject(d => ({ x: d.nodex, y: d.nodey })).on('start', dragNodeStart).on('drag', draggingNode).on('end', dragNodeEnd));
-    const labelsGroup = root.append('g')
-      .selectAll('text')
-      .data(nodes)
-      .enter()
-      .append('text')
-      .attr('x', getLabelX)
-      .attr('y', getLabelY)
-      .attr('font-size', 12)
-      .attr("text-anchor", "middle")
-      .attr('font-weight', 'bold')
-      .attr('line-spacing', 11)
-      .attr('fill', '#000000')
-      .attr('cursor', 'default')
-      .text(d => d.label).call(d3.drag().subject(d => ({ x: d.nodex, y: d.nodey })).on('start', dragLabelStart).on('drag', draggingLabel).on('end', dragLabelEnd));  
+    const tailLineGroup = root.append('g').attr('id', 'tailLineGroup'),
+      tailRingGroup = root.append('g').attr('id', 'tailRingGroup'),
+      headLineGroup = root.append('g').attr('id', 'headLineGroup'),
+      headRingGroup = root.append('g').attr('id', 'headRingGroup'),
+      nodeGroup = root.append('g').attr('id', 'nodeGroup'),
+      labelGroup = root.append('g').attr('id', 'labelGroup');
+    let nodes, tailLines, tailRings, headLines, headRings, labels;
+    function drawSnap() {
+      const newTailLines = tailLineGroup.selectAll('line').data(data);
+      newTailLines.exit().remove();
+      tailLines = newTailLines.enter()
+        .append('line')
+        .attr('stroke', '#9B9B9B')
+        .attr('stroke-width', 6)
+        .attr('stroke-linecap', 'square')
+        .on('click', () => d3.event.stopPropagation()).merge(newTailLines);
+
+      const newTailRings = tailRingGroup.selectAll('path').data(data);
+      newTailRings.exit().remove();
+      tailRings = newTailRings.enter()
+        .append('path')
+        .attr('d', 'M17,29 C23.627417,29 29,23.627417 29,17 C29,10.372583 23.627417,5 17,5 C10.372583,5 5,10.372583 5,17')
+        .attr('stroke-width', 2.5)
+        .attr('stroke', '#9B9B9B')
+        .attr('fill', 'none')
+        .on('click', () => d3.event.stopPropagation()).merge(newTailRings);
+
+      const newHeadLines = headLineGroup.selectAll('line').data(data);
+      newHeadLines.exit().remove();
+      headLines = newHeadLines.enter()
+        .append('line')
+        .attr('stroke', '#9B9B9B')
+        .attr('stroke-width', 6)
+        .attr('stroke-linecap', 'square')
+        .on('click', () => d3.event.stopPropagation()).merge(newHeadLines);
+
+      const newHeadRings = headRingGroup.selectAll('circle').data(data);
+      newHeadRings.exit().remove();
+      headRings = newHeadRings.enter()
+        .append('circle')
+        .attr('stroke', '#9B9B9B')
+        .attr('stroke-width', 2)
+        .attr('fill', '#CCDCEE')
+        .attr('r', R)
+        .attr('cursor', 'pointer')
+        .call(d3.drag().subject(d => ({ x: d.cx || getHeadRingCX(d), y: d.cy || getHeadRingCY(d) })).on('start', dragHeadRingStart).on('drag', draggingHeadRing).on('end', dragHeadRingEnd))
+        .on('click', () => d3.event.stopPropagation()).merge(newHeadRings);
+
+      const newNodes = nodeGroup.selectAll('rect').data(data);
+      newNodes.exit().remove();
+      nodes = newNodes.enter()
+        .append('rect')
+        .attr('height', rectSize)
+        .attr('width', rectSize)
+        .attr('fill', '#79A1E2')
+        .call(d3.drag().subject(d => ({ x: d.nodex, y: d.nodey })).on('start', dragNodeStart).on('drag', draggingNode).on('end', dragNodeEnd))
+        .on('click', onClickNode).merge(newNodes);
+
+      const newLabels = labelGroup.selectAll('text').data(data);
+      newLabels.exit().remove();
+      labels = newLabels.enter()
+        .append('text')
+        .attr('font-size', 12)
+        .attr("text-anchor", "middle")
+        .attr('font-weight', 'bold')
+        .attr('line-spacing', 11)
+        .attr('fill', '#000000')
+        .attr('cursor', 'default')
+        .text(d => d.label)
+        .call(d3.drag().subject(d => ({ x: d.nodex, y: d.nodey })).on('start', dragLabelStart).on('drag', draggingLabel).on('end', dragLabelEnd))
+        .on('click', onClickLabel).merge(newLabels);
+    }
+
+    function onClickNode(d) {
+      d3.event.stopPropagation()
+      if (d3.event.shiftKey) {
+        data = data.filter(temp => temp !== d);
+        links = links.filter(link => link.source !== d);
+        links.forEach(link => {
+          if (link.target === d) {
+            link.source.cx = null;
+            link.source.cy = null;
+          }
+        })
+        drawSnap();
+        update();
+      } else {
+        console.log('clicked');
+      }
+    }
+    function onClickLabel(d) {
+      onClickNode(d);
+    }
     function updateNode(node) {
       node.attr('x', d => d.nodex)
         .attr('y', d => d.nodey);
@@ -155,12 +178,12 @@
         .attr('cy', getHeadRingCY)
     }
     function update() {
-      nodeGroup.call(updateNode);
-      labelsGroup.call(updateLabel);
-      tailLineGroup.call(updateTailLine);
-      tailRingGroup.call(updateTailRing);
-      headLineGroup.call(updateHeadLine);
-      headRingGroup.call(updateHeadRing);
+      nodes.call(updateNode);
+      labels.call(updateLabel);
+      tailLines.call(updateTailLine);
+      tailRings.call(updateTailRing);
+      headLines.call(updateHeadLine);
+      headRings.call(updateHeadRing);
     }
     function dragNodeStart(d) {
       d3.event.sourceEvent.stopPropagation();
@@ -242,7 +265,13 @@
         }
       })
     }
-    // nodeGroup
-    // labelsGroup
-    // headRingGroup;
+    svg.on('click', () => {
+      console.log('add a new snap');
+      const newNode = { nodex: d3.event.x, nodey: d3.event.y, label: 'new snap', cx: null, cy: null };
+      data.push(newNode);
+      drawSnap();
+      update();
+    })
+    drawSnap();
+    update();
   </script>
