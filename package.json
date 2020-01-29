@@ -1,0 +1,8 @@
+{
+  "name": "d3research",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:RyanZhu1024/d3research.git",
+  "author": "Ryan Zhu <rzhu@snaplogic.com>",
+  "license": "MIT"
+}
