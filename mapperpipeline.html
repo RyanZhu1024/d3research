@@ -5,6 +5,20 @@
   <title>mapper Pipeline</title>
 </head>
 <style>
+  @keyframes colorChange {
+    0% {
+      stroke: #999
+    }
+
+    50% {
+      stroke: green
+    }
+
+    100% {
+      stroke: #999
+    }
+  }
+
   .node {
     stroke: #fff;
     stroke-width: 1.5px;
@@ -12,6 +26,9 @@
 
   .link {
     stroke: #999;
+    stroke-width: 6;
+    stroke-linecap: square;
+    animation: colorChange 1s infinite;
   }
 </style>
 
@@ -88,9 +105,7 @@
       headLines.exit().remove();
       headLines = headLines.enter()
         .append('line')
-        .attr('stroke', '#9B9B9B')
-        .attr('stroke-width', 6)
-        .attr('stroke-linecap', 'square')
+        .attr('class', 'link')
         .on('click', () => d3.event.stopPropagation()).merge(headLines);
 
       headRings = headRingGroup.selectAll('circle').data(data);
