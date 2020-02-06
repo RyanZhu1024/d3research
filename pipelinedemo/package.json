@@ -1,0 +1,14 @@
+{
+  "scripts": {
+    "start": "parcel index.html --open",
+    "build": "parcel build index.html"
+  },
+  "name": "pipelinedemo",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "d3": "^5.15.0",
+    "shortid": "^2.2.15"
+  }
+}

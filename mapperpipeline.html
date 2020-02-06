@@ -52,10 +52,12 @@
     function zoomed() {
       root.attr("transform", d3.event.transform);
     }
-    svg.call(d3.zoom()
-      .extent([[0, 0], [width, height]])
-      .scaleExtent([-8, 8])
-      .on("zoom", zoomed));
+    svg.call(
+      d3.zoom()
+        .extent([[0, 0], [width, height]])
+        .scaleExtent([-8, 8])
+        .on("zoom", zoomed)
+    );
     const getLabelX = d => d.nodex + rectSize / 2;
     const getLabelY = d => d.nodey + rectSize / 2;
     const getTailLineX1 = d => d.nodex - 5;
