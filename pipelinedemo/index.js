@@ -1,4 +1,5 @@
 import shortid from "shortid";
+import { sample } from 'lodash/collection';
 import * as d3 from "d3";
 import "./styles.css";
 const TYPE = {
@@ -37,11 +38,6 @@ const pipelineNodes = [
     id: shortid.generate(),
     type: TYPE.READ,
     name: "File Reader",
-    suggest: {
-      id: shortid.generate(),
-      type: TYPE.TRANSFORM,
-      name: 'Mapper'
-    }
   },
   {
     id: shortid.generate(),
@@ -116,7 +112,7 @@ const pipelineLinks = [
 ];
 
 const width = window.innerWidth,
-  height = window.innerHeight;
+  height = window.innerHeight - 200;
 const svg = d3
   .select("#app")
   .append("svg")
@@ -217,3 +213,13 @@ function tick() {
   nodesGroup.attr('transform', function (d) { return `translate(${d.x}, ${d.y})` })
   labelsGroup.attr('x', function (d) { return d.x + 20 }).attr('y', function (d) { return d.y })
 };
+d3.select('#addSnap').on('click', () => {
+  const type = sample(Object.values(TYPE));
+  const newNode = {
+    id: shortid.generate(),
+    type: TYPE.READ,
+    name: `Snap ${type.name}`,
+  }
+  pipelineNodes.push(newNode);
+  simulation.restart();
+})
