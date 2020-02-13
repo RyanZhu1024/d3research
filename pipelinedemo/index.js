@@ -131,49 +131,69 @@ svg.call(
 
 const simulation = d3
   .forceSimulation()
-  .force("link", d3.forceLink().links(pipelineLinks).id(d => d.id).distance(50).strength(0.5))
+  .force("link", d3.forceLink().links(pipelineLinks).distance(50).strength(0.5))
   // .force('collide', d3.forceCollide(function (d) { return d.r + 9 }).iterations(16))
   .force("charge", d3.forceManyBody().strength(-300))
   .force("center", d3.forceCenter(width / 2, height / 2))
   // .force('y', d3.forceY(0))
   // .force('x', d3.forceX(0))
   .nodes(pipelineNodes).on('tick', tick);
-const linksGroup = root
+let linksGroup = root
   .append("g")
   .attr("class", "linksGroup")
-  .selectAll("line")
-  .data(pipelineLinks)
-  .enter()
-  .append("line")
-  .attr("stroke", "black");
-const nodesGroup = root
+  .selectAll("line");
+
+let nodesGroup = root
   .append("g")
   .attr("class", "nodesGroup")
-  .selectAll('path')
-  .data(pipelineNodes)
-  .enter()
-  .append('path')
-  .attr('d', function (d) { return d.type.shapeValue })
-  .attr('fill', function (d) { return d.type.color })
-  .attr('cursor', 'pointer')
-  .on('click', onClickNode)
-  .call(
-    d3
-      .drag()
-      .on("start", dragStarted)
-      .on("drag", dragged)
-      .on("end", dragEnded)
-  );
-const labelsGroup = root
+  .selectAll('path');
+
+let labelsGroup = root
   .append('g')
-  .attr('class', 'textsGrou')
-  .selectAll('text')
-  .data(pipelineNodes)
-  .enter()
-  .append('text')
-  .text(function (d) { return d.name })
-  .attr('font-size', '10px')
-  .attr('fill', 'red')
+  .attr('class', 'textsGroup')
+  .selectAll('text');
+
+const update = () => {
+  // update link
+  linksGroup = linksGroup.data(pipelineLinks, function (d) { return `${d.source.id}-${d.target.id}` });
+  linksGroup.exit().remove();
+  linksGroup = linksGroup.enter()
+    .append("line")
+    .attr("stroke", "black")
+    .merge(linksGroup);
+  // update nodes group
+  nodesGroup = nodesGroup.data(pipelineNodes, function (d) { return d.id });
+  nodesGroup.exit().remove();
+  nodesGroup = nodesGroup.enter()
+    .append('path')
+    .attr('d', function (d) { return d.type.shapeValue })
+    .attr('fill', function (d) { return d.type.color })
+    .attr('cursor', 'pointer')
+    .on('click', onClickNode)
+    .call(
+      d3
+        .drag()
+        .on("start", dragStarted)
+        .on("drag", dragged)
+        .on("end", dragEnded)
+    )
+    .merge(nodesGroup);
+  // update labels group
+  labelsGroup = labelsGroup.data(pipelineNodes);
+  labelsGroup.exit().remove();
+  labelsGroup = labelsGroup.enter()
+    .append('text')
+    .text(function (d) { return d.name })
+    .attr('font-size', '10px')
+    .attr('fill', 'red')
+    .merge(labelsGroup);
+  simulation.nodes(pipelineNodes);
+  simulation.force('link').links(pipelineLinks);
+  simulation.alpha(1).restart();
+}
+// run
+update();
+
 function onClickNode(d) {
   alert(`You select ${d.name}`)
 }
@@ -219,7 +239,9 @@ d3.select('#addSnap').on('click', () => {
     id: shortid.generate(),
     type: TYPE.READ,
     name: `Snap ${type.name}`,
+    x: width / 2,
+    y: height / 2,
   }
   pipelineNodes.push(newNode);
-  simulation.restart();
-})
+  update();
+});
