@@ -111,13 +111,11 @@ const pipelineLinks = [
   { source: pipelineNodes[11], target: pipelineNodes[6] }
 ];
 
-const width = window.innerWidth,
-  height = window.innerHeight - 200;
+
 const svg = d3
   .select("#app")
-  .append("svg")
-  .attr("width", width)
-  .attr("height", height);
+const width = parseFloat(svg.style('width').slice(0, -2)),
+  height = parseFloat(svg.style('height').slice(0, -2));
 
 const root = svg.append("g");
 const zoomed = function () { root.attr("transform", d3.event.transform); }
@@ -131,10 +129,10 @@ svg.call(
 
 const simulation = d3
   .forceSimulation()
-  .force("link", d3.forceLink().links(pipelineLinks).distance(50).strength(0.5))
-  // .force('collide', d3.forceCollide(function (d) { return d.r + 9 }).iterations(16))
-  .force("charge", d3.forceManyBody().strength(-300))
-  .force("center", d3.forceCenter(width / 2, height / 2))
+  .force("link", d3.forceLink().links(pipelineLinks).distance(500).strength(0.5))
+  .force('collide', d3.forceCollide(function (d) { return d.r + 9 }).iterations(16))
+  // .force("charge", d3.forceManyBody().strength(-300))
+  // .force("center", d3.forceCenter(width / 2, height / 2))
   // .force('y', d3.forceY(0))
   // .force('x', d3.forceX(0))
   .nodes(pipelineNodes).on('tick', tick);

@@ -13,14 +13,14 @@
   <title>Hello, world!</title>
   <style>
     .footer {
+      flex-basis: 10%;
       text-align: center;
-      height: 100px;
       background: #EBB3A9;
     }
 
     .header {
+      flex-basis: 10%;
       text-align: center;
-      height: 100px;
       background: #EBB3A9;
     }
 
@@ -28,21 +28,32 @@
       text-align: center;
       background: #EEEBD0;
     }
+
+    .main {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app {
+      flex: 1;
+    }
+
+    .root {
+      height: 100vh;
+    }
   </style>
 </head>
 
 <body>
   <div class="container-fluid">
-    <div class="row">
+    <div class="row root">
       <div class="col-2 leftBar">
         <h3>Side Bar</h3>
         <button id="addSnap">Add Snap</button>
       </div>
-      <div class="col-10">
+      <div class="col-10 main">
         <div class="row header">Header</div>
-        <div class="row">
-          <div id="app"></div>
-        </div>
+        <svg id="app" class="row app" />
         <div class="row footer">Footer</div>
       </div>
     </div>
