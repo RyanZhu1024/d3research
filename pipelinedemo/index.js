@@ -130,7 +130,7 @@ svg.call(
 const simulation = d3
   .forceSimulation()
   .force("link", d3.forceLink().links(pipelineLinks).distance(500).strength(0.5))
-  .force('collide', d3.forceCollide(function (d) { return d.r + 9 }).iterations(16))
+  // .force('collide', d3.forceCollide(function (d) { return d.r + 9 }).iterations(16))
   // .force("charge", d3.forceManyBody().strength(-300))
   // .force("center", d3.forceCenter(width / 2, height / 2))
   // .force('y', d3.forceY(0))
