@@ -1,114 +1,13 @@
 import React, { useEffect } from 'react';
 import shortid from "shortid";
+import { ItemTypes } from '../data/dragTypes';
 import * as d3 from 'd3';
-
-const TYPE = {
-  READ: {
-    name: "read", color: '#16af11',
-    shapeValue: 'm -9,-17 26,0 -7,34 -27,0 z'
-  },
-  PARSE: {
-    name: "parse", color: '#FECD01',
-    shapeValue: 'm 0,-17 17,34 -34,0 z'
-
-  },
-  TRANSFORM: {
-    name: "transform", color: '#4c4cfc',
-    shapeValue: 'm -16,-16 32,0 0,32 -32,0 z'
-
-  },
-  FLOW: {
-    name: "flow", color: '#06c8c9',
-    shapeValue: 'm 0,-17 17,17 -17,17 -17,-17 17,-17 z'
-
-  },
-  FORMAT: {
-    name: "format", color: '#ffdbac',
-    shapeValue: 'm -17,-17 34,0 0,26 C -4,8 5,21 -17,16 z'
-
-  },
-  WRITE: {
-    name: "write", color: '#d581d9',
-    shapeValue: 'm -11,-17 28,0 c 0,0 -6,7 -6,17 0,10 6,17 6,17 l -28,0 c 0,0 -6,-7 -6,-17 0,-10 6,-17 6,-17 z'
-  }
-};
+import { useDrop } from 'react-dnd'
 
 const pipelineNodes = [
-  {
-    id: shortid.generate(),
-    type: TYPE.READ,
-    name: "File Reader",
-  },
-  {
-    id: shortid.generate(),
-    type: TYPE.PARSE,
-    name: "CSV Parser",
-  },
-  {
-    id: shortid.generate(),
-    type: TYPE.TRANSFORM,
-    name: "Mapper",
-  },
-  {
-    id: shortid.generate(),
-    type: TYPE.FLOW,
-    name: "Copy",
-  },
-  {
-    id: shortid.generate(),
-    type: TYPE.TRANSFORM,
-    name: "Aggregate"
-  },
-  {
-    id: shortid.generate(),
-    type: TYPE.TRANSFORM,
-    name: "Mapper 1"
-  },
-  {
-    id: shortid.generate(),
-    type: TYPE.TRANSFORM,
-    name: "Join"
-  },
-  {
-    id: shortid.generate(),
-    type: TYPE.TRANSFORM,
-    name: "Structure"
-  },
-  {
-    id: shortid.generate(),
-    type: TYPE.FORMAT,
-    name: "JSON Formatter"
-  },
-  {
-    id: shortid.generate(),
-    type: TYPE.WRITE,
-    name: "File Writer"
-  },
-  {
-    id: shortid.generate(),
-    type: TYPE.TRANSFORM,
-    name: "Aggregate 1"
-  },
-  {
-    id: shortid.generate(),
-    type: TYPE.TRANSFORM,
-    name: "Mapper 2"
-  }
 ];
 
 const pipelineLinks = [
-  { source: pipelineNodes[0], target: pipelineNodes[1] },
-  { source: pipelineNodes[1], target: pipelineNodes[2] },
-  { source: pipelineNodes[2], target: pipelineNodes[3] },
-  { source: pipelineNodes[3], target: pipelineNodes[4] },
-  { source: pipelineNodes[4], target: pipelineNodes[5] },
-  { source: pipelineNodes[5], target: pipelineNodes[6] },
-  { source: pipelineNodes[6], target: pipelineNodes[7] },
-  { source: pipelineNodes[7], target: pipelineNodes[8] },
-  { source: pipelineNodes[8], target: pipelineNodes[9] },
-  { source: pipelineNodes[3], target: pipelineNodes[10] },
-  { source: pipelineNodes[10], target: pipelineNodes[11] },
-  { source: pipelineNodes[11], target: pipelineNodes[6] }
 ];
 
 let linksGroup = null;
@@ -119,12 +18,16 @@ let labelsGroup = null;
 
 let simulation = null;
 
+let width = 0;
+
+let height = 0;
+
 
 function init() {
   const svg = d3
     .select("#workbench")
-  const width = parseFloat(svg.style('width').slice(0, -2)),
-    height = parseFloat(svg.style('height').slice(0, -2));
+  width = parseFloat(svg.style('width').slice(0, -2));
+  height = parseFloat(svg.style('height').slice(0, -2));
 
   const root = svg.append("g");
   const zoomed = function () { root.attr("transform", d3.event.transform); }
@@ -241,20 +144,28 @@ function tick() {
   nodesGroup.attr('transform', function (d) { return `translate(${d.x}, ${d.y})` })
   labelsGroup.attr('x', function (d) { return d.x + 20 }).attr('y', function (d) { return d.y })
 };
-// d3.select('#addSnap').on('click', () => {
-//   const type = sample(Object.values(TYPE));
-//   const newNode = {
-//     id: shortid.generate(),
-//     type: TYPE.READ,
-//     name: `Snap ${type.name}`,
-//     x: width / 2,
-//     y: height / 2,
-//   }
-//   pipelineNodes.push(newNode);
-//   update();
-// });
+
+const createNewNode = ({ node }) => {
+  console.log(node);
+  const newNode = {
+    id: shortid.generate(),
+    type: node.type,
+    name: `Snap ${node.name}`,
+    x: width / 2,
+    y: height / 2,
+  }
+  pipelineNodes.push(newNode);
+  update();
+}
 
 const Workbench = ({ className }) => {
+  const [{ isOver }, drop] = useDrop({
+    accept: ItemTypes.WORKFLOW_NODE,
+    drop: (item) => createNewNode(item),
+    collect: monitor => ({
+      isOver: !!monitor.isOver(),
+    }),
+  })
   useEffect(() => {
     init();
     update();
@@ -262,7 +173,7 @@ const Workbench = ({ className }) => {
   console.log('render bench');
   return (
     <div className={className}>
-      <svg id="workbench" className="w-full h-full" />
+      <svg ref={drop} id="workbench" className="w-full h-full" />
     </div>
   )
 }
