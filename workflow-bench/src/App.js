@@ -9,10 +9,10 @@ class App extends React.Component {
   render() {
     return (
       <div className="flex flex-row bg-gray-200 h-screen">
-        <Nav className="w-64 px-4 py-2 m-2" />
-        <div className="flex flex-col px-4 py-2 m-2">
-          <Workbench className="flex-1" />
-          <Console className="h-64 justify-end" />
+        <Nav className="w-64 px-4 py-2 m-2 border border-blue-500" />
+        <div className="flex flex-col px-4 py-2 flex-1">
+          <Workbench className="flex-1 mb-2 border border-red-500" />
+          <Console className="h-64 justify-end border border-green-500" />
         </div>
       </div>
     )

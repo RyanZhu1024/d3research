@@ -1,9 +1,10 @@
-import React from 'react'
+import React, { useRef } from 'react';
 
 const Workbench = ({ className }) => {
+  const svgRef = useRef();
   return (
     <div className={className}>
-      Workbench
+      <svg ref={svgRef} className="w-full h-full"/>
     </div>
   )
 }
