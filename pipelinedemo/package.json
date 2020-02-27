@@ -11,5 +11,8 @@
     "d3": "^5.15.0",
     "lodash": "^4.17.15",
     "shortid": "^2.2.15"
+  },
+  "devDependencies": {
+    "parcel-bundler": "^1.12.4"
   }
 }

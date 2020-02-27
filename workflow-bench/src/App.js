@@ -7,6 +7,7 @@ import Console from "./components/Console";
 
 class App extends React.Component {
   render() {
+    console.log('render app');
     return (
       <div className="flex flex-row bg-gray-200 h-screen">
         <Nav className="w-64 px-4 py-2 m-2 border border-blue-500" />
