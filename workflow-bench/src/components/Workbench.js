@@ -18,6 +18,8 @@ let labelsGroup = null;
 
 let simulation = null;
 
+let ringsGroup = null;
+
 let width = 0;
 
 let height = 0;
@@ -41,13 +43,17 @@ function init() {
 
   simulation = d3
     .forceSimulation()
-    .force("link", d3.forceLink().links(pipelineLinks).distance(500).strength(0.5))
+    .force("link", d3.forceLink().links(pipelineLinks).distance(300).strength(0.5))
     .force('collide', d3.forceCollide(function (d) { return d.r + 9 }).iterations(16))
-    .force("charge", d3.forceManyBody().strength(-300))
+    .force("charge", d3.forceManyBody().strength(-500))
     .force("center", d3.forceCenter(width / 2, height / 2))
     .force('y', d3.forceY(0))
     .force('x', d3.forceX(0))
     .nodes(pipelineNodes).on('tick', tick);
+  ringsGroup = root
+    .append('g')
+    .attr('class', 'ringsGroup')
+    .selectAll('circle');
   linksGroup = root
     .append("g")
     .attr("class", "linksGroup")
@@ -62,6 +68,11 @@ function init() {
     .append('g')
     .attr('class', 'textsGroup')
     .selectAll('text');
+}
+
+const handleRingMouseDown = (d) => {
+  console.log('clicked on rings' + d);
+  
 }
 
 
@@ -91,6 +102,18 @@ const update = () => {
         .on("end", dragEnded)
     )
     .merge(nodesGroup);
+  // update ring group
+  ringsGroup = ringsGroup.data(pipelineNodes, function (d) { return d.id });
+  ringsGroup.exit().remove();
+  ringsGroup = ringsGroup.enter()
+    .append('circle')
+    .attr('stroke', 'blue')
+    .attr('stroke-width', 5)
+    .attr('fill', 'none')
+    .attr('cursor', 'pointer')
+    .attr('r', 40)
+    .on('mousedown', handleRingMouseDown)
+    .merge(ringsGroup);
   // update labels group
   labelsGroup = labelsGroup.data(pipelineNodes);
   labelsGroup.exit().remove();
@@ -128,6 +151,7 @@ function dragEnded(d) {
 }
 
 function tick() {
+  ringsGroup.attr('cx', function (d) { return d.x }).attr('cy', function (d) { return d.y });
   linksGroup
     .attr("x1", function (d) {
       return d.source.x;
