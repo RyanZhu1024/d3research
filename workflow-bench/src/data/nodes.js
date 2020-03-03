@@ -1,4 +1,4 @@
-const TYPE = {
+export const TYPE = {
   READ: {
     name: "read", color: '#16af11',
     shapeValue: 'm -9,-17 26,0 -7,34 -27,0 z',

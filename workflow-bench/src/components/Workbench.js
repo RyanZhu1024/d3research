@@ -3,12 +3,15 @@ import shortid from "shortid";
 import { times } from 'lodash';
 import { ItemTypes } from '../data/dragTypes';
 import * as d3 from 'd3';
-import { useDrop } from 'react-dnd'
+import { useDrop } from 'react-dnd';
+import { TYPE } from '../data/nodes';
 
 const pipelineNodes = [
   createNewNode({
-    name: 'Salesforce Reader',
-    type: TYPE.READ,
+    node: {
+      name: 'Salesforce Reader',
+      type: TYPE.READ,
+    }
   })
 ];
 
@@ -221,7 +224,7 @@ function tick() {
   labelsGroup.attr('x', function (d) { return d.x + 20 }).attr('y', function (d) { return d.y })
 };
 
-const createNewNode = ({ node }) => {
+function createNewNode({ node }) {
   console.log(node);
   const newNode = {
     id: shortid.generate(),
