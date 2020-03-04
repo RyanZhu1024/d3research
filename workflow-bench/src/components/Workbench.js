@@ -1,10 +1,18 @@
 import React, { useEffect } from 'react';
 import shortid from "shortid";
+import { times } from 'lodash';
 import { ItemTypes } from '../data/dragTypes';
 import * as d3 from 'd3';
-import { useDrop } from 'react-dnd'
+import { useDrop } from 'react-dnd';
+import { TYPE } from '../data/nodes';
 
 const pipelineNodes = [
+  createNewNode({
+    node: {
+      name: 'Salesforce Reader',
+      type: TYPE.READ,
+    }
+  })
 ];
 
 const pipelineLinks = [
@@ -18,10 +26,15 @@ let labelsGroup = null;
 
 let simulation = null;
 
+let ringsGroup = null;
+
+let connectorGroup = null;
+
 let width = 0;
 
 let height = 0;
 
+const nodesSimulation = [];
 
 function init() {
   const svg = d3.select("#workbench");
@@ -40,13 +53,17 @@ function init() {
 
   simulation = d3
     .forceSimulation()
-    .force("link", d3.forceLink().links(pipelineLinks).distance(500).strength(0.5))
+    .force("link", d3.forceLink().links(pipelineLinks).distance(300).strength(0.5))
     .force('collide', d3.forceCollide(function (d) { return d.r + 9 }).iterations(16))
-    .force("charge", d3.forceManyBody().strength(-300))
+    .force("charge", d3.forceManyBody().strength(-500))
     .force("center", d3.forceCenter(width / 2, height / 2))
     .force('y', d3.forceY(0))
     .force('x', d3.forceX(0))
     .nodes(pipelineNodes).on('tick', tick);
+  ringsGroup = root
+    .append('g')
+    .attr('class', 'ringsGroup')
+    .selectAll('circle');
   linksGroup = root
     .append("g")
     .attr("class", "linksGroup")
@@ -61,6 +78,55 @@ function init() {
     .append('g')
     .attr('class', 'textsGroup')
     .selectAll('text');
+  initNodes();
+}
+
+const handleRingMouseDown = (d) => {
+  console.log('clicked on rings' + d);
+}
+
+function initNodes() {
+  pipelineNodes.forEach(node => {
+    const inputOutputNodes = [
+      ...times(node.type.input, () => {
+        return {
+          id: shortid.generate(),
+          type: 'input',
+        }
+      }),
+      ...times(node.type.output, () => {
+        return {
+          id: shortid.generate(),
+          type: 'output',
+        }
+      }),
+    ];
+    const inputOutputLinks = inputOutputNodes.map(n => ({
+      source: n,
+      target: node,
+    }));
+    const nodeSim = d3
+      .forceSimulation()
+      .force("link", d3.forceLink().links(inputOutputLinks).distance(300).strength(0.5))
+      .force("charge", d3.forceManyBody().strength(-300))
+      .force("center", d3.forceCenter(node.x, node.y))
+      .nodes([inputOutputNodes, node]).on('tick', connectorTick);
+    nodesSimulation.push(nodeSim);
+    connectorGroup = root
+      .append('g')
+      .attr('class', 'connectorGroup')
+      .selectAll('circle')
+      .data(inputOutputNodes)
+      .enter()
+      .append('curcle')
+      .attr('stroke', 'black')
+      .attr('stroke-width', 1)
+      .attr('fill', function (d) { return d.type === 'input' ? 'green' : 'red' });
+  });
+}
+
+const connectorTick = () => {
+  connectorGroup.attr('cx', function (d) { return d.x }).attr('cy', function (d) { return d.y });
 }
 
 
@@ -90,6 +156,18 @@ const update = () => {
         .on("end", dragEnded)
     )
     .merge(nodesGroup);
+  // update ring group
+  ringsGroup = ringsGroup.data(pipelineNodes, function (d) { return d.id });
+  ringsGroup.exit().remove();
+  ringsGroup = ringsGroup.enter()
+    .append('circle')
+    .attr('stroke', 'blue')
+    .attr('stroke-width', 1)
+    .attr('fill', 'none')
+    .attr('cursor', 'pointer')
+    .attr('r', 40)
+    .on('mousedown', handleRingMouseDown)
+    .merge(ringsGroup);
   // update labels group
   labelsGroup = labelsGroup.data(pipelineNodes);
   labelsGroup.exit().remove();
@@ -127,6 +205,7 @@ function dragEnded(d) {
 }
 
 function tick() {
+  ringsGroup.attr('cx', function (d) { return d.x }).attr('cy', function (d) { return d.y });
   linksGroup
     .attr("x1", function (d) {
       return d.source.x;
@@ -144,7 +223,7 @@ function tick() {
   labelsGroup.attr('x', function (d) { return d.x + 20 }).attr('y', function (d) { return d.y })
 };
 
-const createNewNode = ({ node }) => {
+function createNewNode({ node }) {
   console.log(node);
   const newNode = {
     id: shortid.generate(),
