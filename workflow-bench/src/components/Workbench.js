@@ -24,8 +24,7 @@ let height = 0;
 
 
 function init() {
-  const svg = d3
-    .select("#workbench")
+  const svg = d3.select("#workbench");
   width = parseFloat(svg.style('width').slice(0, -2));
   height = parseFloat(svg.style('height').slice(0, -2));
 
