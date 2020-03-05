@@ -5,14 +5,15 @@ import { ItemTypes } from '../data/dragTypes';
 import * as d3 from 'd3';
 import { useDrop } from 'react-dnd';
 import { TYPE } from '../data/nodes';
+import test from './test'
 
 const pipelineNodes = [
-  createNewNode({
-    node: {
-      name: 'Salesforce Reader',
-      type: TYPE.READ,
-    }
-  })
+  // createNewNode({
+  //   node: {
+  //     name: 'Salesforce Reader',
+  //     type: TYPE.READ,
+  //   }
+  // })
 ];
 
 const pipelineLinks = [
@@ -245,8 +246,9 @@ const Workbench = ({ className }) => {
     }),
   })
   useEffect(() => {
-    init();
-    update();
+    // init();
+    // update();
+    test()
   }, []);
   console.log('render bench');
   return (
