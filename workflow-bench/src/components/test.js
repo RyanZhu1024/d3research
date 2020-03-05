@@ -1,5 +1,6 @@
 import * as d3 from 'd3';
 import shortid from "shortid";
+import './style.css';
 
 export default () => {
 
@@ -63,7 +64,7 @@ export default () => {
     },
   ]
 
-  let width, height, currentConnector;
+  let width, height, currentConnector, drawLine;
   const svg = d3.select("#workbench");
 
   width = parseFloat(svg.style('width').slice(0, -2));
@@ -102,28 +103,29 @@ export default () => {
     .on('mouseover', connectorMouseover);
 
   function connectorMousedown(d) {
-    currentConnector = d.step;
-    svg.on('mousemove', connectorMousemove)
-    svg.on('mouseup', connectorMouseup)
-    svg.append('line')
-      .attr('id', 'drawline')
-      .attr('stoke', 'black')
-      .attr('stoke-width', 5)
+    currentConnector = d;
+    drawLine = svg
+      .append('line')
+      .attr('class', 'drawLine')
       .attr('x1', d.x)
       .attr('y1', d.y)
       .attr('x2', d.x)
       .attr('y2', d.y);
+    svg.on('mousemove', connectorMousemove)
+    svg.on('mouseup', connectorMouseup)
   }
   function connectorMouseup() {
     currentConnector = null;
     svg.on('mousemove', null);
-    svg.select('#drawline').remove();
+    drawLine.remove();
   }
   function connectorMouseover(d) {
   }
 
   function connectorMousemove() {
-    svg.select('#drawline').attr('x2', d3.mouse(this)[0]).attr('y2', d3.mouse(this)[1]);
+    drawLine
+      .attr('x2', d3.mouse(this)[0])
+      .attr('y2', d3.mouse(this)[1]);
   }
 
   function tick() {
