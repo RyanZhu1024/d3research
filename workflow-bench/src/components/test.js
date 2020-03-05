@@ -64,7 +64,9 @@ export default () => {
     },
   ]
 
-  let width, height, currentConnector, drawLine;
+  let width, height,
+    currentSource, currentTarget,
+    drawLine, stepLinksGroup, stepNodesGroup;
   const svg = d3.select("#workbench");
 
   width = parseFloat(svg.style('width').slice(0, -2));
@@ -80,30 +82,57 @@ export default () => {
     .on('tick', tick);
 
 
-  const stepLinksGroup = root.append('g')
-    .selectAll('line')
-    .data(stepLinks)
-    .enter()
-    .append('line')
-    .attr('stroke', function (d) { return d.stroke })
-    .attr('stroke-width', function (d) { return d.strokeWidth });
+  stepLinksGroup = root.append('g').selectAll('line');
+  // .selectAll('line')
+  // .data(stepLinks)
+  // .enter()
+  // .append('line')
+  // .attr('stroke', function (d) { return d.stroke })
+  // .attr('stroke-width', function (d) { return d.strokeWidth });
 
-  const stepNodesGroup = root.append('g')
-    .selectAll('circle')
-    .data([...stepNodes, ...connectorNodes], function (n) { return n.id })
-    .enter()
-    .append('circle')
-    .attr('fill', function (d) { return d.color })
-    .attr('class', function (d) { return d.type === 'step' ? 'step' : 'connector' })
-    .attr('cursor', 'pointer')
-    .attr('r', function (d) { return d.type === 'step' ? 50 : 10 });
-  d3.selectAll('.step').call(d3.drag().on('start', dragStarted).on('drag', dragged).on('end', dragEnded));
-  d3.selectAll('.connector')
-    .on('mousedown', connectorMousedown)
-    .on('mouseover', connectorMouseover);
+  stepNodesGroup = root.append('g').selectAll('circle');
+  //   .selectAll('circle')
+  //   .data([...stepNodes, ...connectorNodes], function (n) { return n.id })
+  //   .enter()
+  //   .append('circle')
+  //   .attr('fill', function (d) { return d.color })
+  //   .attr('class', function (d) { return d.type === 'step' ? 'step' : 'connector' })
+  //   .attr('cursor', 'pointer')
+  //   .attr('r', function (d) { return d.type === 'step' ? 50 : 10 });
+  // d3.selectAll('.step').call(d3.drag().on('start', dragStarted).on('drag', dragged).on('end', dragEnded));
+  // d3.selectAll('.connector')
+  //   .on('mousedown', connectorMousedown)
+  //   .on('mouseover', connectorMouseover);
+  function update() {
+    stepLinksGroup = stepLinksGroup.data(stepLinks);
+    stepLinksGroup.exit().remove();
+    stepLinksGroup = stepLinksGroup.enter()
+      .append('line')
+      .attr('stroke', function (d) { return d.stroke })
+      .attr('stroke-width', function (d) { return d.strokeWidth })
+      .merge(stepLinksGroup);
+
+    stepNodesGroup = stepNodesGroup.data([...stepNodes, ...connectorNodes]);
+    stepNodesGroup.exit().remove();
+    stepNodesGroup = stepNodesGroup.enter()
+      .append('circle')
+      .attr('fill', function (d) { return d.color })
+      .attr('class', function (d) { return d.type === 'step' ? 'step' : 'connector' })
+      .attr('cursor', 'pointer')
+      .attr('r', function (d) { return d.type === 'step' ? 50 : 10 })
+      .merge(stepNodesGroup);
+
+    d3.selectAll('.step').call(d3.drag().on('start', dragStarted).on('drag', dragged).on('end', dragEnded));
+    d3.selectAll('.connector')
+      .on('mousedown', connectorMousedown)
+      .on('mouseover', connectorMouseover);
+    simulation.nodes([...stepNodes, ...connectorNodes]);
+    simulation.force('link').links(stepLinks);
+    simulation.alpha(1).restart();
+  }
 
   function connectorMousedown(d) {
-    currentConnector = d;
+    currentSource = d;
     drawLine = svg
       .append('line')
       .attr('class', 'drawLine')
@@ -112,14 +141,34 @@ export default () => {
       .attr('x2', d.x)
       .attr('y2', d.y);
     svg.on('mousemove', connectorMousemove)
-    svg.on('mouseup', connectorMouseup)
+    svg.on('mouseup', drawMouseup)
   }
-  function connectorMouseup() {
-    currentConnector = null;
-    svg.on('mousemove', null);
+
+  function isAbleToConnect() {
+    return currentSource
+      && currentTarget
+      && currentSource.type !== currentTarget.type
+      && currentSource.step !== currentTarget.step;
+  }
+
+  function drawMouseup() {
+    if (isAbleToConnect()) {
+      stepLinks.push({
+        source: currentSource,
+        target: currentTarget,
+        distance: 100,
+        stroke: 'black',
+        strokeWidth: 5,
+      })
+      update();
+    }
+    currentSource = null;
+    currentTarget = null;
     drawLine.remove();
+    svg.on('mousemove', null);
   }
   function connectorMouseover(d) {
+    currentTarget = d;
   }
 
   function connectorMousemove() {
@@ -163,4 +212,6 @@ export default () => {
     d.fx = null;
     d.fy = null;
   }
+
+  update();
 }
