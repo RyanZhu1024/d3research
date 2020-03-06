@@ -103,6 +103,9 @@ export default () => {
   // d3.selectAll('.connector')
   //   .on('mousedown', connectorMousedown)
   //   .on('mouseover', connectorMouseover);
+  function removeLink(d) {
+    
+  }
   function update() {
     stepLinksGroup = stepLinksGroup.data(stepLinks);
     stepLinksGroup.exit().remove();
@@ -110,6 +113,7 @@ export default () => {
       .append('line')
       .attr('stroke', function (d) { return d.stroke })
       .attr('stroke-width', function (d) { return d.strokeWidth })
+      .on('dblclick', removeLink)
       .merge(stepLinksGroup);
 
     stepNodesGroup = stepNodesGroup.data([...stepNodes, ...connectorNodes]);
