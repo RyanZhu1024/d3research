@@ -19,7 +19,7 @@ export default () => {
     { id: shortid.generate(), type: 'output', color: 'blue', step: stepNodes[2] },
   ]
 
-  const stepLinks = [
+  let stepLinks = [
     {
       source: stepNodes[0],
       target: connectorNodes[0],
@@ -104,7 +104,11 @@ export default () => {
   //   .on('mousedown', connectorMousedown)
   //   .on('mouseover', connectorMouseover);
   function removeLink(d) {
-    
+    const src = d.source, tgt = d.target;
+    if (src.step && tgt.step) {
+      stepLinks = stepLinks.filter(l => l !== d);
+      update();
+    }
   }
   function update() {
     stepLinksGroup = stepLinksGroup.data(stepLinks);
@@ -132,7 +136,7 @@ export default () => {
       .on('mouseover', connectorMouseover);
     simulation.nodes([...stepNodes, ...connectorNodes]);
     simulation.force('link').links(stepLinks);
-    simulation.alpha(1).restart();
+    simulation.restart();
   }
 
   function connectorMousedown(d) {
